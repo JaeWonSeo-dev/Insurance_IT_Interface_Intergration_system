@@ -14,6 +14,7 @@
 - Spring Boot 3.3.5
 - Spring MVC + Thymeleaf
 - Spring Data JPA
+- Spring Security
 - H2 Database (In-Memory)
 - Gradle
 - JUnit 5, MockMvc
@@ -127,7 +128,15 @@ src/main/java/com/portfolio/integration
 	- User: `sa`
 	- Password: (빈 값)
 
-### 8.2 테스트 실행
+### 8.2 로그인 계정 (개발용)
+- `admin / Admin@1234` (ROLE_ADMIN)
+- `operator / Operator@1234` (ROLE_OPERATOR)
+
+보안 정책:
+- `/api/**`, 화면 URL은 인증 사용자만 접근 가능
+- 정적 리소스와 H2 콘솔은 개발 편의를 위해 허용
+
+### 8.3 테스트 실행
 ```bash
 .\gradlew.bat test
 ```
