@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -73,5 +74,32 @@ class InterfaceApiControllerTest {
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$[0].interfaceCode").isNotEmpty())
                                 .andExpect(jsonPath("$[0].resultType").isNotEmpty());
+        }
+
+        @Test
+        void executeEndpointShouldUpdateFailureCountAndStatus() throws Exception {
+                String payload = """
+                                {
+                                  "resultType": "FAILURE",
+                                  "message": "외부 시스템 타임아웃",
+                                  "retriable": true
+                                }
+                                """;
+
+                mockMvc.perform(post("/api/interfaces/1/execute")
+                                                .contentType(MediaType.APPLICATION_JSON)
+                                                .content(payload))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.id").value(1))
+                                .andExpect(jsonPath("$.status").value("FAILED"));
+        }
+
+        @Test
+        void deleteEndpointShouldDeactivateInterface() throws Exception {
+                mockMvc.perform(delete("/api/interfaces/4"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.id").value(4))
+                                .andExpect(jsonPath("$.status").value("PAUSED"))
+                                .andExpect(jsonPath("$.active").value(false));
         }
 }

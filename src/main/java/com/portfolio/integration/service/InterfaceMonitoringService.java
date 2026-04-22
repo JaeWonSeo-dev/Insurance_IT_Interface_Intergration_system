@@ -13,6 +13,7 @@ import com.portfolio.integration.dto.DashboardResponse;
 import com.portfolio.integration.dto.ErrorLogResponse;
 import com.portfolio.integration.dto.ErrorLogSearchCondition;
 import com.portfolio.integration.dto.ExecutionHistoryResponse;
+import com.portfolio.integration.dto.InterfaceExecutionRequest;
 import com.portfolio.integration.dto.InterfaceRegistrationRequest;
 import com.portfolio.integration.dto.InterfaceSearchCondition;
 import com.portfolio.integration.dto.InterfaceStatusUpdateRequest;
@@ -242,6 +243,39 @@ public class InterfaceMonitoringService {
                 appendExecutionHistory(saved, ExecutionResultType.SUCCESS, "실패 건 수동 재처리", true);
                 return toSummary(saved);
     }
+
+        @Transactional
+        public InterfaceSummaryResponse recordExecution(Long interfaceId, InterfaceExecutionRequest request) {
+                InsuranceInterface item = getInterface(interfaceId);
+
+                if (request.resultType() == ExecutionResultType.SUCCESS) {
+                        item.setStatus(InterfaceStatus.RUNNING);
+                        item.setSuccessCount(item.getSuccessCount() + 1);
+                } else if (request.resultType() == ExecutionResultType.WARNING) {
+                        item.setStatus(InterfaceStatus.WARNING);
+                } else {
+                        item.setStatus(InterfaceStatus.FAILED);
+                        item.setFailureCount(item.getFailureCount() + 1);
+                }
+
+                item.setLastExecutionAt(LocalDateTime.now());
+
+                if (request.resultType() != ExecutionResultType.SUCCESS) {
+                        boolean retriable = request.retriable() != null ? request.retriable() : request.resultType() == ExecutionResultType.FAILURE;
+                        errorLogRepository.save(ErrorLog.builder()
+                                        .interfaceId(interfaceId)
+                                        .interfaceCode(item.getInterfaceCode())
+                                        .message("실행 결과 기록: " + request.resultType())
+                                        .detail(request.message())
+                                        .occurredAt(LocalDateTime.now())
+                                        .retriable(retriable)
+                                        .build());
+                }
+
+                InsuranceInterface saved = interfaceRepository.save(item);
+                appendExecutionHistory(saved, request.resultType(), request.message(), false);
+                return toSummary(saved);
+        }
 
     private InterfaceSummaryResponse toSummary(InsuranceInterface item) {
         return new InterfaceSummaryResponse(

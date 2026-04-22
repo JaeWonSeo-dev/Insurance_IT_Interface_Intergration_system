@@ -98,6 +98,36 @@
                     </div>
                 </form>
 
+                <div class="section-header" style="margin-top: 20px;">
+                    <h3>실행 결과 반영</h3>
+                </div>
+                <form th:action="@{'/interfaces/' + ${item.id} + '/execute'}" th:object="${executeForm}" method="post" class="form-grid">
+                    <label>
+                        실행 결과
+                        <select th:field="*{resultType}">
+                            <option value="">선택</option>
+                            <option value="SUCCESS">SUCCESS</option>
+                            <option value="WARNING">WARNING</option>
+                            <option value="FAILURE">FAILURE</option>
+                        </select>
+                    </label>
+                    <label>
+                        재처리 가능
+                        <select th:field="*{retriable}">
+                            <option value="">자동 판정</option>
+                            <option value="true">가능</option>
+                            <option value="false">불가</option>
+                        </select>
+                    </label>
+                    <label class="full-width">
+                        실행 메시지
+                        <input type="text" th:field="*{message}" placeholder="예: 배치 처리 정상 완료 / 외부 응답 지연 발생">
+                    </label>
+                    <div class="actions full-width">
+                        <button type="submit" class="secondary">실행 반영</button>
+                    </div>
+                </form>
+
                 <div class="stats-list">
                     <div>
                         <span>성공 건수</span>

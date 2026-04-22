@@ -6,6 +6,7 @@ import com.portfolio.integration.dto.DashboardResponse;
 import com.portfolio.integration.dto.ErrorLogResponse;
 import com.portfolio.integration.dto.ErrorLogSearchCondition;
 import com.portfolio.integration.dto.ExecutionHistoryResponse;
+import com.portfolio.integration.dto.InterfaceExecutionRequest;
 import com.portfolio.integration.dto.InterfaceRegistrationRequest;
 import com.portfolio.integration.dto.InterfaceSearchCondition;
 import com.portfolio.integration.dto.InterfaceSummaryResponse;
@@ -18,10 +19,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -82,9 +83,20 @@ public class InterfaceApiController {
         return interfaceMonitoringService.deactivate(id);
     }
 
+    @DeleteMapping("/interfaces/{id}")
+    public InterfaceSummaryResponse deactivateByDelete(@PathVariable Long id) {
+        return interfaceMonitoringService.deactivate(id);
+    }
+
     @PostMapping("/interfaces/{id}/retry")
     public InterfaceSummaryResponse retry(@PathVariable Long id) {
         return interfaceMonitoringService.retry(id);
+    }
+
+    @PostMapping("/interfaces/{id}/execute")
+    public InterfaceSummaryResponse recordExecution(@PathVariable Long id,
+                                                    @Valid @RequestBody InterfaceExecutionRequest request) {
+        return interfaceMonitoringService.recordExecution(id, request);
     }
 
     @GetMapping("/logs")

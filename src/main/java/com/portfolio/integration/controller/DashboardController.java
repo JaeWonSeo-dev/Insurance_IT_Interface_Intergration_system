@@ -4,6 +4,7 @@ import com.portfolio.integration.domain.InterfaceChannelType;
 import com.portfolio.integration.domain.InterfaceDirection;
 import com.portfolio.integration.domain.InterfaceStatus;
 import com.portfolio.integration.dto.ErrorLogSearchCondition;
+import com.portfolio.integration.dto.InterfaceExecutionRequest;
 import com.portfolio.integration.dto.InterfaceRegistrationRequest;
 import com.portfolio.integration.dto.InterfaceSearchCondition;
 import com.portfolio.integration.dto.InterfaceStatusUpdateRequest;
@@ -80,6 +81,7 @@ public class DashboardController {
                 item.active()
         ));
         model.addAttribute("statusForm", new InterfaceStatusUpdateRequest(item.status()));
+        model.addAttribute("executeForm", new InterfaceExecutionRequest(null, "", null));
         model.addAttribute("channelTypes", InterfaceChannelType.values());
         model.addAttribute("directions", InterfaceDirection.values());
         model.addAttribute("statuses", InterfaceStatus.values());
@@ -124,6 +126,7 @@ public class DashboardController {
         if (bindingResult.hasErrors()) {
             model.addAttribute("item", interfaceMonitoringService.getInterfaceSummary(id));
             model.addAttribute("statusForm", new InterfaceStatusUpdateRequest(request.status()));
+            model.addAttribute("executeForm", new InterfaceExecutionRequest(null, "", null));
             model.addAttribute("channelTypes", InterfaceChannelType.values());
             model.addAttribute("directions", InterfaceDirection.values());
             model.addAttribute("statuses", InterfaceStatus.values());
@@ -145,6 +148,42 @@ public class DashboardController {
                                RedirectAttributes redirectAttributes) {
         interfaceMonitoringService.changeStatus(id, request);
         redirectAttributes.addFlashAttribute("message", "운영 상태가 변경되었습니다.");
+        return "redirect:/interfaces/" + id;
+    }
+
+    @PostMapping("/interfaces/{id}/execute")
+    public String execute(@PathVariable Long id,
+                          @Valid @ModelAttribute("executeForm") InterfaceExecutionRequest request,
+                          BindingResult bindingResult,
+                          RedirectAttributes redirectAttributes,
+                          Model model) {
+        if (bindingResult.hasErrors()) {
+            var item = interfaceMonitoringService.getInterfaceSummary(id);
+            model.addAttribute("item", item);
+            model.addAttribute("updateForm", new InterfaceUpdateRequest(
+                    item.interfaceName(),
+                    item.sourceSystem(),
+                    item.targetSystem(),
+                    item.channelType(),
+                    item.direction(),
+                    item.status(),
+                    item.ownerTeam(),
+                    item.description(),
+                    item.active()
+            ));
+            model.addAttribute("statusForm", new InterfaceStatusUpdateRequest(item.status()));
+            model.addAttribute("channelTypes", InterfaceChannelType.values());
+            model.addAttribute("directions", InterfaceDirection.values());
+            model.addAttribute("statuses", InterfaceStatus.values());
+            model.addAttribute("logs", interfaceMonitoringService.getErrorLogs(
+                    new ErrorLogSearchCondition(null, id, null)
+            ));
+            model.addAttribute("executions", interfaceMonitoringService.getExecutionsByInterface(id));
+            return "interface-detail";
+        }
+
+        interfaceMonitoringService.recordExecution(id, request);
+        redirectAttributes.addFlashAttribute("message", "실행 결과가 반영되었습니다.");
         return "redirect:/interfaces/" + id;
     }
 

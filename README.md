@@ -99,6 +99,9 @@ src/main/java/com/portfolio/integration
 ### 운영 확장 API
 - `PUT /api/interfaces/{id}/status` : 상태 변경
 - `POST /api/interfaces/{id}/deactivate` : 비활성화
+- `DELETE /api/interfaces/{id}` : 비활성화(RESTful)
+- `POST /api/interfaces/{id}/execute` : 실행 결과 반영(성공/경고/실패, 카운트/로그/이력이력 갱신)
+- `GET /api/executions` : 최근 실행 이력 조회
 
 ## 6. 데이터 저장 및 초기 데이터
 - H2 In-Memory DB 사용
