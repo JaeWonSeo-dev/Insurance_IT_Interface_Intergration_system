@@ -132,6 +132,34 @@
                 </article>
             </div>
         </section>
+
+        <section class="card">
+            <div class="section-header">
+                <h3>실행 이력</h3>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>실행 시각</th>
+                        <th>상태</th>
+                        <th>결과</th>
+                        <th>메시지</th>
+                        <th>재처리</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="execution : ${executions}">
+                        <td th:text="${#temporals.format(execution.executedAt, 'yyyy-MM-dd HH:mm:ss')}"></td>
+                        <td th:text="${execution.status}"></td>
+                        <td th:text="${execution.resultType}"></td>
+                        <td th:text="${execution.message}"></td>
+                        <td th:text="${execution.retried ? 'Y' : 'N'}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
     </main>
 </div>
 </body>

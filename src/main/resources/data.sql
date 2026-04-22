@@ -13,3 +13,12 @@ VALUES
 (3, 'IF-PAY-003', 'MQ ACK Timeout', 'Payment Gateway 응답 지연으로 ACK 수신에 실패했습니다.', DATEADD('MINUTE', -18, CURRENT_TIMESTAMP), TRUE),
 (2, 'IF-POL-002', '배치 파일 스키마 경고', 'Document Hub 업로드 대상 CSV 필드 순서가 변경되었습니다.', DATEADD('HOUR', -3, CURRENT_TIMESTAMP), FALSE),
 (3, 'IF-PAY-003', 'Retry Queue Overload', '재처리 큐 적체로 처리 지연이 발생했습니다.', DATEADD('MINUTE', -55, CURRENT_TIMESTAMP), TRUE);
+
+INSERT INTO interface_execution_history
+(interface_id, interface_code, status, result_type, message, executed_at, retried)
+VALUES
+(1, 'IF-CLM-001', 'RUNNING', 'SUCCESS', '청구 수신 처리 정상 완료', DATEADD('MINUTE', -6, CURRENT_TIMESTAMP), FALSE),
+(2, 'IF-POL-002', 'WARNING', 'WARNING', '배치 검증 경고 발생', DATEADD('MINUTE', -20, CURRENT_TIMESTAMP), FALSE),
+(3, 'IF-PAY-003', 'FAILED', 'FAILURE', 'MQ ACK Timeout 재발생', DATEADD('MINUTE', -18, CURRENT_TIMESTAMP), FALSE),
+(4, 'IF-CUS-004', 'PAUSED', 'WARNING', '야간 동기화 일시중지 상태 유지', DATEADD('HOUR', -4, CURRENT_TIMESTAMP), FALSE),
+(5, 'IF-UWD-005', 'RUNNING', 'SUCCESS', '심사 결과 송신 정상 완료', DATEADD('MINUTE', -11, CURRENT_TIMESTAMP), FALSE);

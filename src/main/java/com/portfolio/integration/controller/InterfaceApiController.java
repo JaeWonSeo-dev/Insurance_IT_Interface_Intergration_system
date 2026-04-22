@@ -2,9 +2,10 @@ package com.portfolio.integration.controller;
 
 import com.portfolio.integration.domain.InterfaceChannelType;
 import com.portfolio.integration.domain.InterfaceStatus;
-import com.portfolio.integration.dto.DashboardMetrics;
+import com.portfolio.integration.dto.DashboardResponse;
 import com.portfolio.integration.dto.ErrorLogResponse;
 import com.portfolio.integration.dto.ErrorLogSearchCondition;
+import com.portfolio.integration.dto.ExecutionHistoryResponse;
 import com.portfolio.integration.dto.InterfaceRegistrationRequest;
 import com.portfolio.integration.dto.InterfaceSearchCondition;
 import com.portfolio.integration.dto.InterfaceSummaryResponse;
@@ -38,8 +39,8 @@ public class InterfaceApiController {
     }
 
     @GetMapping("/dashboard")
-    public DashboardMetrics dashboard() {
-        return interfaceMonitoringService.getDashboardMetrics();
+    public DashboardResponse dashboard() {
+        return interfaceMonitoringService.getDashboard();
     }
 
     @GetMapping("/interfaces")
@@ -91,5 +92,13 @@ public class InterfaceApiController {
                                        @RequestParam(required = false) Long interfaceId,
                                        @RequestParam(required = false) Boolean retriable) {
         return interfaceMonitoringService.getErrorLogs(new ErrorLogSearchCondition(keyword, interfaceId, retriable));
+    }
+
+    @GetMapping("/executions")
+    public List<ExecutionHistoryResponse> executions(@RequestParam(required = false) Long interfaceId) {
+        if (interfaceId == null) {
+            return interfaceMonitoringService.getRecentExecutions(10);
+        }
+        return interfaceMonitoringService.getExecutionsByInterface(interfaceId);
     }
 }

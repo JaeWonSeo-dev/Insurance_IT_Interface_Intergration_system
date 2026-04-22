@@ -45,6 +45,7 @@ public class DashboardController {
         model.addAttribute("errorLogs", interfaceMonitoringService.getErrorLogs(
                 new ErrorLogSearchCondition(logKeyword, logInterfaceId, retriable)
         ));
+        model.addAttribute("recentExecutions", interfaceMonitoringService.getRecentExecutions(10));
         if (!model.containsAttribute("registrationForm")) {
             model.addAttribute("registrationForm", new InterfaceRegistrationRequest(
                     "", "", "", "", null, null, "", ""
@@ -85,6 +86,7 @@ public class DashboardController {
         model.addAttribute("logs", interfaceMonitoringService.getErrorLogs(
                 new ErrorLogSearchCondition(null, id, null)
         ));
+        model.addAttribute("executions", interfaceMonitoringService.getExecutionsByInterface(id));
         return "interface-detail";
     }
 
@@ -101,6 +103,7 @@ public class DashboardController {
             model.addAttribute("errorLogs", interfaceMonitoringService.getErrorLogs(
                     new ErrorLogSearchCondition(null, null, null)
             ));
+                model.addAttribute("recentExecutions", interfaceMonitoringService.getRecentExecutions(10));
             model.addAttribute("channelTypes", InterfaceChannelType.values());
             model.addAttribute("directions", InterfaceDirection.values());
             model.addAttribute("statuses", InterfaceStatus.values());
@@ -127,6 +130,7 @@ public class DashboardController {
             model.addAttribute("logs", interfaceMonitoringService.getErrorLogs(
                     new ErrorLogSearchCondition(null, id, null)
             ));
+                model.addAttribute("executions", interfaceMonitoringService.getExecutionsByInterface(id));
             return "interface-detail";
         }
 

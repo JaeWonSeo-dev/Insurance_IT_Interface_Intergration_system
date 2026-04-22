@@ -30,8 +30,9 @@ class InterfaceApiControllerTest {
     void getDashboardShouldReturnMetrics() throws Exception {
         mockMvc.perform(get("/api/dashboard"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.totalInterfaces").isNumber())
-                .andExpect(jsonPath("$.successRate").isNumber());
+                                .andExpect(jsonPath("$.metrics.totalInterfaces").isNumber())
+                                .andExpect(jsonPath("$.metrics.successRate").isNumber())
+                                .andExpect(jsonPath("$.recentExecutions").isArray());
     }
 
     @Test
@@ -65,4 +66,12 @@ class InterfaceApiControllerTest {
                 .andExpect(jsonPath("$.id").value(3))
                 .andExpect(jsonPath("$.status").value("RUNNING"));
     }
+
+        @Test
+        void executionsEndpointShouldReturnExecutionHistory() throws Exception {
+                mockMvc.perform(get("/api/executions"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$[0].interfaceCode").isNotEmpty())
+                                .andExpect(jsonPath("$[0].resultType").isNotEmpty());
+        }
 }

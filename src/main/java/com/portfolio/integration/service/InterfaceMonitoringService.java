@@ -1,13 +1,18 @@
 package com.portfolio.integration.service;
 
+import com.portfolio.integration.domain.ExecutionResultType;
 import com.portfolio.integration.domain.ErrorLog;
 import com.portfolio.integration.domain.ErrorLogRepository;
 import com.portfolio.integration.domain.InsuranceInterface;
 import com.portfolio.integration.domain.InsuranceInterfaceRepository;
+import com.portfolio.integration.domain.InterfaceExecutionHistory;
+import com.portfolio.integration.domain.InterfaceExecutionHistoryRepository;
 import com.portfolio.integration.domain.InterfaceStatus;
 import com.portfolio.integration.dto.DashboardMetrics;
+import com.portfolio.integration.dto.DashboardResponse;
 import com.portfolio.integration.dto.ErrorLogResponse;
 import com.portfolio.integration.dto.ErrorLogSearchCondition;
+import com.portfolio.integration.dto.ExecutionHistoryResponse;
 import com.portfolio.integration.dto.InterfaceRegistrationRequest;
 import com.portfolio.integration.dto.InterfaceSearchCondition;
 import com.portfolio.integration.dto.InterfaceStatusUpdateRequest;
@@ -27,12 +32,23 @@ public class InterfaceMonitoringService {
 
         private final InsuranceInterfaceRepository interfaceRepository;
         private final ErrorLogRepository errorLogRepository;
+        private final InterfaceExecutionHistoryRepository executionHistoryRepository;
 
         public InterfaceMonitoringService(InsuranceInterfaceRepository interfaceRepository,
-                                                                          ErrorLogRepository errorLogRepository) {
+                                                                          ErrorLogRepository errorLogRepository,
+                                                                          InterfaceExecutionHistoryRepository executionHistoryRepository) {
                 this.interfaceRepository = interfaceRepository;
                 this.errorLogRepository = errorLogRepository;
+                this.executionHistoryRepository = executionHistoryRepository;
     }
+
+        public DashboardResponse getDashboard() {
+                return new DashboardResponse(
+                                getDashboardMetrics(),
+                                getErrorLogs(new ErrorLogSearchCondition(null, null, null)).stream().limit(5).toList(),
+                                getRecentExecutions(10)
+                );
+        }
 
     public List<InsuranceInterface> getInterfaces() {
                 return interfaceRepository.findAll().stream()
@@ -126,6 +142,19 @@ public class InterfaceMonitoringService {
         );
     }
 
+        public List<ExecutionHistoryResponse> getRecentExecutions(int limit) {
+                return executionHistoryRepository.findTop10ByOrderByExecutedAtDesc().stream()
+                                .limit(limit)
+                                .map(this::toExecutionResponse)
+                                .toList();
+        }
+
+        public List<ExecutionHistoryResponse> getExecutionsByInterface(Long interfaceId) {
+                return executionHistoryRepository.findTop20ByInterfaceIdOrderByExecutedAtDesc(interfaceId).stream()
+                                .map(this::toExecutionResponse)
+                                .toList();
+        }
+
         @Transactional
     public void register(InterfaceRegistrationRequest request) {
                 interfaceRepository.findByInterfaceCode(request.interfaceCode())
@@ -149,7 +178,8 @@ public class InterfaceMonitoringService {
                                 .active(true)
                                 .build();
 
-                interfaceRepository.save(entity);
+                InsuranceInterface saved = interfaceRepository.save(entity);
+                appendExecutionHistory(saved, ExecutionResultType.SUCCESS, "신규 인터페이스 등록", false);
     }
 
         @Transactional
@@ -165,7 +195,9 @@ public class InterfaceMonitoringService {
                 item.setDescription(request.description());
                 item.setActive(request.active());
                 item.setLastExecutionAt(LocalDateTime.now());
-                return toSummary(interfaceRepository.save(item));
+                InsuranceInterface saved = interfaceRepository.save(item);
+                appendExecutionHistory(saved, ExecutionResultType.SUCCESS, "인터페이스 정보 수정", false);
+                return toSummary(saved);
         }
 
         @Transactional
@@ -173,7 +205,10 @@ public class InterfaceMonitoringService {
                 InsuranceInterface item = getInterface(id);
                 item.setStatus(request.status());
                 item.setLastExecutionAt(LocalDateTime.now());
-                return toSummary(interfaceRepository.save(item));
+                InsuranceInterface saved = interfaceRepository.save(item);
+                appendExecutionHistory(saved, request.status() == InterfaceStatus.FAILED ? ExecutionResultType.FAILURE : ExecutionResultType.SUCCESS,
+                        "운영 상태 변경: " + request.status(), false);
+                return toSummary(saved);
         }
 
         @Transactional
@@ -182,7 +217,9 @@ public class InterfaceMonitoringService {
                 item.setActive(false);
                 item.setStatus(InterfaceStatus.PAUSED);
                 item.setLastExecutionAt(LocalDateTime.now());
-                return toSummary(interfaceRepository.save(item));
+                InsuranceInterface saved = interfaceRepository.save(item);
+                appendExecutionHistory(saved, ExecutionResultType.WARNING, "인터페이스 비활성화", false);
+                return toSummary(saved);
         }
 
         @Transactional
@@ -201,7 +238,9 @@ public class InterfaceMonitoringService {
                                 .retriable(false)
                                 .build());
 
-                return toSummary(interfaceRepository.save(item));
+                InsuranceInterface saved = interfaceRepository.save(item);
+                appendExecutionHistory(saved, ExecutionResultType.SUCCESS, "실패 건 수동 재처리", true);
+                return toSummary(saved);
     }
 
     private InterfaceSummaryResponse toSummary(InsuranceInterface item) {
@@ -234,4 +273,32 @@ public class InterfaceMonitoringService {
                                 log.isRetriable()
         );
     }
+
+        private ExecutionHistoryResponse toExecutionResponse(InterfaceExecutionHistory history) {
+                return new ExecutionHistoryResponse(
+                                history.getId(),
+                                history.getInterfaceId(),
+                                history.getInterfaceCode(),
+                                history.getStatus(),
+                                history.getResultType(),
+                                history.getMessage(),
+                                history.getExecutedAt(),
+                                history.isRetried()
+                );
+        }
+
+        private void appendExecutionHistory(InsuranceInterface item,
+                                                                                ExecutionResultType resultType,
+                                                                                String message,
+                                                                                boolean retried) {
+                executionHistoryRepository.save(InterfaceExecutionHistory.builder()
+                                .interfaceId(item.getId())
+                                .interfaceCode(item.getInterfaceCode())
+                                .status(item.getStatus())
+                                .resultType(resultType)
+                                .message(message)
+                                .executedAt(LocalDateTime.now())
+                                .retried(retried)
+                                .build());
+        }
 }
