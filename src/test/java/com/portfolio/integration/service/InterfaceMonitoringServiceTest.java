@@ -3,6 +3,7 @@ package com.portfolio.integration.service;
 import com.portfolio.integration.domain.InterfaceChannelType;
 import com.portfolio.integration.domain.InterfaceDirection;
 import com.portfolio.integration.domain.InterfaceStatus;
+import com.portfolio.integration.dto.InterfaceExecutionRequest;
 import com.portfolio.integration.dto.InterfaceRegistrationRequest;
 import com.portfolio.integration.dto.InterfaceSearchCondition;
 import org.junit.jupiter.api.Test;
@@ -57,5 +58,20 @@ class InterfaceMonitoringServiceTest {
 
         assertThat(retried.status()).isEqualTo(InterfaceStatus.RUNNING);
         assertThat(retried.successCount()).isEqualTo(beforeSuccess + 1);
+    }
+
+    @Test
+    void recordExecutionShouldUpdateFailureAndStatus() {
+        var target = service.search(new InterfaceSearchCondition("IF-CLM-001", null, null, true)).get(0);
+        int beforeFailure = target.failureCount();
+
+        var updated = service.recordExecution(target.id(), new InterfaceExecutionRequest(
+                com.portfolio.integration.domain.ExecutionResultType.FAILURE,
+                "외부 인증서 오류",
+                true
+        ));
+
+        assertThat(updated.status()).isEqualTo(InterfaceStatus.FAILED);
+        assertThat(updated.failureCount()).isEqualTo(beforeFailure + 1);
     }
 }
