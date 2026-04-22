@@ -1,0 +1,68 @@
+package com.portfolio.integration.controller;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.portfolio.integration.domain.InterfaceChannelType;
+import com.portfolio.integration.domain.InterfaceDirection;
+import com.portfolio.integration.dto.InterfaceRegistrationRequest;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+@SpringBootTest
+@AutoConfigureMockMvc
+class InterfaceApiControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Test
+    void getDashboardShouldReturnMetrics() throws Exception {
+        mockMvc.perform(get("/api/dashboard"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalInterfaces").isNumber())
+                .andExpect(jsonPath("$.successRate").isNumber());
+    }
+
+    @Test
+    void createInterfaceAndFetchListShouldWork() throws Exception {
+        InterfaceRegistrationRequest request = new InterfaceRegistrationRequest(
+                "IF-API-777",
+                "API 생성 테스트",
+                "API Source",
+                "API Target",
+                InterfaceChannelType.SOAP,
+                InterfaceDirection.OUTBOUND,
+                "API운영팀",
+                "API 등록 테스트"
+        );
+
+        mockMvc.perform(post("/api/interfaces")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.message").value("신규 인터페이스가 등록되었습니다."));
+
+        mockMvc.perform(get("/api/interfaces").param("keyword", "IF-API-777"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].interfaceCode").value("IF-API-777"));
+    }
+
+    @Test
+    void retryEndpointShouldReturnUpdatedInterface() throws Exception {
+        mockMvc.perform(post("/api/interfaces/3/retry"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(3))
+                .andExpect(jsonPath("$.status").value("RUNNING"));
+    }
+}
