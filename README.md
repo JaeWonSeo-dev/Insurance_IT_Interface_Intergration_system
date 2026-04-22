@@ -108,6 +108,7 @@ src/main/java/com/portfolio/integration
 - H2 In-Memory DB 사용
 - `data.sql` 자동 로딩으로 샘플 인터페이스/로그 데이터 구성
 - JPA 엔티티 기반 영속화 적용
+- MySQL 프로파일(`mysql`) 분리 지원
 
 ## 7. 화면
 - `/` : 통합 대시보드 (지표 + 인터페이스 검색/필터 + 로그 필터)
@@ -121,6 +122,15 @@ src/main/java/com/portfolio/integration
 .\gradlew.bat bootRun
 ```
 
+### 8.2 Docker(MySQL) + MySQL 프로파일 실행
+```bash
+# 1) MySQL 기동
+docker compose up -d
+
+# 2) 애플리케이션(MySQL 프로파일)
+.\gradlew.bat bootRun --args="--spring.profiles.active=mysql"
+```
+
 접속 URL:
 - `http://localhost:8081`
 - H2 Console: `http://localhost:8081/h2-console`
@@ -128,7 +138,7 @@ src/main/java/com/portfolio/integration
 	- User: `sa`
 	- Password: (빈 값)
 
-### 8.2 로그인 계정 (개발용)
+### 8.3 로그인 계정 (개발용)
 - `admin / Admin@1234` (ROLE_ADMIN)
 - `operator / Operator@1234` (ROLE_OPERATOR)
 
@@ -136,7 +146,7 @@ src/main/java/com/portfolio/integration
 - `/api/**`, 화면 URL은 인증 사용자만 접근 가능
 - 정적 리소스와 H2 콘솔은 개발 편의를 위해 허용
 
-### 8.3 테스트 실행
+### 8.4 테스트 실행
 ```bash
 .\gradlew.bat test
 ```
