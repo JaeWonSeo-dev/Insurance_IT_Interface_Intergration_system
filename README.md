@@ -22,6 +22,8 @@
 ## 3. 아키텍처 및 패키지 구조
 ```
 src/main/java/com/portfolio/integration
+├─ config
+│  └─ SecurityConfig.java
 ├─ controller
 │  ├─ DashboardController.java
 │  ├─ InterfaceApiController.java
@@ -29,20 +31,26 @@ src/main/java/com/portfolio/integration
 ├─ domain
 │  ├─ InsuranceInterface.java
 │  ├─ ErrorLog.java
+│  ├─ InterfaceExecutionHistory.java
 │  ├─ InsuranceInterfaceRepository.java
 │  ├─ ErrorLogRepository.java
+│  ├─ InterfaceExecutionHistoryRepository.java
+│  ├─ ExecutionResultType.java
 │  ├─ InterfaceStatus.java
 │  ├─ InterfaceChannelType.java
 │  └─ InterfaceDirection.java
 ├─ dto
+│  ├─ DashboardResponse.java
 │  ├─ DashboardMetrics.java
+│  ├─ InterfaceExecutionRequest.java
 │  ├─ InterfaceRegistrationRequest.java
 │  ├─ InterfaceUpdateRequest.java
 │  ├─ InterfaceStatusUpdateRequest.java
 │  ├─ InterfaceSearchCondition.java
 │  ├─ InterfaceSummaryResponse.java
 │  ├─ ErrorLogSearchCondition.java
-│  └─ ErrorLogResponse.java
+│  ├─ ErrorLogResponse.java
+│  └─ ExecutionHistoryResponse.java
 └─ service
 	 └─ InterfaceMonitoringService.java
 ```
@@ -85,6 +93,11 @@ src/main/java/com/portfolio/integration
 - 인터페이스별 로그 조회
 - 재처리 가능 여부 표시
 - 로그 검색/필터(키워드, interfaceId, retriable)
+
+### 4.5 보안
+- Spring Security Form Login
+- 역할 기반 접근 제어(ADMIN, OPERATOR)
+- API 및 화면 인증 보호
 
 ## 5. REST API
 
@@ -156,10 +169,14 @@ docker compose up -d
 	- 대시보드 지표 계산 검증
 	- 인터페이스 등록/검색 흐름 검증
 	- 재처리 시 상태/카운트 변경 검증
+	- 실행 결과 반영 시 상태/카운트 변경 검증
 - Controller 테스트(MockMvc):
 	- 대시보드 API 응답 검증
-	- 인터페이스 등록 API 및 목록 조회 검증
+	- 인터페이스 등록/상세/수정/목록 조회 검증
 	- 재처리 API 응답 검증
+	- 실행 결과 반영 API 검증
+	- 로그/실행이력 조회 API 검증
+	- 비활성화 API 검증
 
 ## 10. 향후 개선점
 - 운영 권한 관리(RBAC) 및 감사 로그
