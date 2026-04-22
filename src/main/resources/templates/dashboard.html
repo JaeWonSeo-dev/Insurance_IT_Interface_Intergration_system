@@ -20,6 +20,16 @@
     </aside>
 
     <main class="content">
+        <section class="utility-bar">
+            <div class="utility-links">
+                <a class="button-link secondary-link" th:href="@{/h2-console}" target="_blank">H2 Console</a>
+                <a class="button-link secondary-link" th:href="@{/api/dashboard}" target="_blank">Dashboard API</a>
+            </div>
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" class="secondary">로그아웃</button>
+            </form>
+        </section>
+
         <section class="hero">
             <div>
                 <h2>보험사 금융 IT 인터페이스 통합관리시스템</h2>
@@ -216,6 +226,9 @@
                             </div>
                         </td>
                     </tr>
+                    <tr th:if="${#lists.isEmpty(interfaces)}">
+                        <td colspan="9" class="empty-state">검색 조건에 맞는 인터페이스가 없습니다.</td>
+                    </tr>
                     </tbody>
                 </table>
             </div>
@@ -258,6 +271,12 @@
                         <span th:text="${log.retriable ? '재처리 가능' : '확인 필요'}"></span>
                     </div>
                 </article>
+                <article th:if="${#lists.isEmpty(errorLogs)}" class="log-item">
+                    <div>
+                        <strong>표시할 로그가 없습니다.</strong>
+                        <p>검색 조건을 조정하거나 운영 이벤트가 발생하면 로그가 표시됩니다.</p>
+                    </div>
+                </article>
             </div>
         </section>
 
@@ -290,6 +309,9 @@
                         <td th:text="${execution.resultType}"></td>
                         <td th:text="${execution.message}"></td>
                         <td th:text="${execution.retried ? 'Y' : 'N'}"></td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(recentExecutions)}">
+                        <td colspan="6" class="empty-state">최근 실행 이력이 없습니다.</td>
                     </tr>
                     </tbody>
                 </table>

@@ -9,6 +9,7 @@
 <body>
 <div class="layout detail-layout">
     <main class="content full">
+        <div th:if="${message}" class="flash detail-flash" th:text="${message}"></div>
         <section class="hero">
             <div>
                 <h2 th:text="${item.interfaceCode + ' · ' + item.interfaceName}"></h2>
@@ -160,6 +161,12 @@
                         <span th:text="${log.retriable ? '재처리 가능' : '재처리 불가'}"></span>
                     </div>
                 </article>
+                <article th:if="${#lists.isEmpty(logs)}" class="log-item">
+                    <div>
+                        <strong>로그가 없습니다.</strong>
+                        <p>현재 인터페이스에 대한 장애/이벤트 로그가 존재하지 않습니다.</p>
+                    </div>
+                </article>
             </div>
         </section>
 
@@ -185,6 +192,9 @@
                         <td th:text="${execution.resultType}"></td>
                         <td th:text="${execution.message}"></td>
                         <td th:text="${execution.retried ? 'Y' : 'N'}"></td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(executions)}">
+                        <td colspan="5" class="empty-state">실행 이력이 없습니다.</td>
                     </tr>
                     </tbody>
                 </table>
