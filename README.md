@@ -92,7 +92,7 @@ src/main/java/com/portfolio/integration
 - `GET /api/dashboard`
 - `GET /api/interfaces`
 - `GET /api/interfaces/{id}`
-- `POST /api/interfaces`
+- `POST /api/interfaces` : 등록된 인터페이스 상세 응답 반환
 - `PUT /api/interfaces/{id}`
 - `POST /api/interfaces/{id}/retry`
 - `GET /api/logs`

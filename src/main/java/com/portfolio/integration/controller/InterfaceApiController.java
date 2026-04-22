@@ -27,8 +27,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
-import java.util.Map;
-
 @RestController
 @RequestMapping("/api")
 public class InterfaceApiController {
@@ -61,9 +59,8 @@ public class InterfaceApiController {
 
     @PostMapping("/interfaces")
     @ResponseStatus(HttpStatus.CREATED)
-    public Map<String, String> register(@Valid @RequestBody InterfaceRegistrationRequest request) {
-        interfaceMonitoringService.register(request);
-        return Map.of("message", "신규 인터페이스가 등록되었습니다.");
+    public InterfaceSummaryResponse register(@Valid @RequestBody InterfaceRegistrationRequest request) {
+        return interfaceMonitoringService.register(request);
     }
 
     @PutMapping("/interfaces/{id}")

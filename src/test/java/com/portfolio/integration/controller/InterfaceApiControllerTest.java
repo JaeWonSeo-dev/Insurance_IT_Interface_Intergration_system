@@ -15,6 +15,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -55,11 +56,44 @@ class InterfaceApiControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.message").value("신규 인터페이스가 등록되었습니다."));
+                .andExpect(jsonPath("$.interfaceCode").value("IF-API-777"))
+                .andExpect(jsonPath("$.status").value("RUNNING"));
 
         mockMvc.perform(get("/api/interfaces").param("keyword", "IF-API-777"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].interfaceCode").value("IF-API-777"));
+    }
+
+    @Test
+    void getInterfaceByIdShouldReturnDetail() throws Exception {
+        mockMvc.perform(get("/api/interfaces/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.interfaceCode").isNotEmpty());
+    }
+
+    @Test
+    void putInterfaceShouldUpdateDetail() throws Exception {
+        String payload = """
+                {
+                  "interfaceName": "보험금 청구 수신 연동(수정)",
+                  "sourceSystem": "Partner Portal",
+                  "targetSystem": "Claim Core",
+                  "channelType": "REST_API",
+                  "direction": "INBOUND",
+                  "status": "RUNNING",
+                  "ownerTeam": "청구시스템팀",
+                  "description": "수정 설명",
+                  "active": true
+                }
+                """;
+
+        mockMvc.perform(put("/api/interfaces/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(payload))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.interfaceName").value("보험금 청구 수신 연동(수정)"));
     }
 
     @Test
@@ -76,6 +110,14 @@ class InterfaceApiControllerTest {
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$[0].interfaceCode").isNotEmpty())
                                 .andExpect(jsonPath("$[0].resultType").isNotEmpty());
+        }
+
+        @Test
+        void logsEndpointShouldReturnLogs() throws Exception {
+                mockMvc.perform(get("/api/logs"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$[0].interfaceCode").isNotEmpty())
+                                .andExpect(jsonPath("$[0].message").isNotEmpty());
         }
 
         @Test

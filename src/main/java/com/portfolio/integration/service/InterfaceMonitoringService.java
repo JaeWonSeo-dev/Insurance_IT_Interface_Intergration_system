@@ -156,8 +156,8 @@ public class InterfaceMonitoringService {
                                 .toList();
         }
 
-        @Transactional
-    public void register(InterfaceRegistrationRequest request) {
+                @Transactional
+        public InterfaceSummaryResponse register(InterfaceRegistrationRequest request) {
                 interfaceRepository.findByInterfaceCode(request.interfaceCode())
                                 .ifPresent(existing -> {
                                         throw new IllegalArgumentException("이미 등록된 인터페이스 코드입니다: " + request.interfaceCode());
@@ -181,6 +181,7 @@ public class InterfaceMonitoringService {
 
                 InsuranceInterface saved = interfaceRepository.save(entity);
                 appendExecutionHistory(saved, ExecutionResultType.SUCCESS, "신규 인터페이스 등록", false);
+                return toSummary(saved);
     }
 
         @Transactional
