@@ -51,7 +51,7 @@
                 <div class="section-header">
                     <h3>인터페이스 정보 수정</h3>
                 </div>
-                <form th:action="@{'/interfaces/' + ${item.id} + '/update'}" th:object="${updateForm}" method="post" class="form-grid">
+                <form th:action="@{'/interfaces/' + ${item.id} + '/update'}" th:object="${updateForm}" method="post" class="form-grid" data-preserve-scroll="true">
                     <label>
                         인터페이스명
                         <input type="text" th:field="*{interfaceName}">
@@ -107,7 +107,7 @@
                 <div class="section-header">
                     <h3>운영 상태 빠른 변경</h3>
                 </div>
-                <form th:action="@{'/interfaces/' + ${item.id} + '/status'}" th:object="${statusForm}" method="post" class="form-grid">
+                <form th:action="@{'/interfaces/' + ${item.id} + '/status'}" th:object="${statusForm}" method="post" class="form-grid" data-preserve-scroll="true">
                     <label class="full-width">
                         상태
                         <select th:field="*{status}">
@@ -272,6 +272,28 @@
             }]
         },
         options: { responsive: true, maintainAspectRatio: false }
+    });
+</script>
+</body>
+</html>
+
+tRatio: false }
+    });
+
+    document.querySelectorAll('form[data-preserve-scroll="true"]').forEach(form => {
+        form.addEventListener('submit', () => {
+            sessionStorage.setItem(scrollStorageKey, String(window.scrollY));
+        });
+    });
+
+    window.addEventListener('load', () => {
+        const savedScrollY = sessionStorage.getItem(scrollStorageKey);
+        if (savedScrollY !== null) {
+            requestAnimationFrame(() => {
+                window.scrollTo({ top: Number(savedScrollY), behavior: 'auto' });
+                sessionStorage.removeItem(scrollStorageKey);
+            });
+        }
     });
 </script>
 </body>
