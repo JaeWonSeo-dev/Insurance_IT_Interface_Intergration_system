@@ -94,7 +94,7 @@
                     <h3>인터페이스 등록</h3>
                     <p>운영 대상 인터페이스 메타데이터를 등록합니다.</p>
                 </div>
-                <form th:action="@{/interfaces}" th:object="${registrationForm}" method="post" class="form-grid">
+                <form th:action="@{/interfaces}" th:object="${registrationForm}" method="post" class="form-grid" data-scroll-fragment="registration-section">
                     <label>
                         인터페이스 코드
                         <input type="text" th:field="*{interfaceCode}" placeholder="IF-NEW-001">
@@ -251,7 +251,7 @@
                         <td>
                             <div class="row-actions">
                                 <a class="button-link secondary-link" th:href="@{'/interfaces/' + ${item.id}}">상세</a>
-                                <form th:action="@{'/interfaces/' + ${item.id} + '/retry'}" method="post" data-preserve-scroll="true">
+                                <form th:action="@{'/interfaces/' + ${item.id} + '/retry'}" method="post" data-scroll-fragment="interface-list-section">
                                     <button type="submit" class="secondary">재처리</button>
                                 </form>
                             </div>
@@ -265,7 +265,7 @@
             </div>
         </section>
 
-        <section class="card">
+        <section id="log-section" class="card">
             <div class="section-header">
                 <h3>장애 / 이벤트 로그</h3>
                 <p>운영자 관점에서 최근 이슈를 빠르게 파악할 수 있도록 구성했습니다.</p>
@@ -389,23 +389,6 @@
             const statusValues = /*[[${statusChartValues}]]*/ [];
             const timelineLabels = /*[[${executionTimelineLabels}]]*/ [];
             const failureValues = /*[[${executionFailureValues}]]*/ [];
-            const scrollStorageKey = 'dashboard-scroll:' + window.location.pathname;
-
-            const persistScroll = () => sessionStorage.setItem(scrollStorageKey, String(window.scrollY));
-            const restoreScroll = () => {
-                const savedScrollY = sessionStorage.getItem(scrollStorageKey);
-                if (savedScrollY === null) return;
-                const top = Number(savedScrollY);
-                window.scrollTo(0, top);
-                requestAnimationFrame(() => window.scrollTo(0, top));
-                setTimeout(() => window.scrollTo(0, top), 0);
-                setTimeout(() => window.scrollTo(0, top), 150);
-                setTimeout(() => sessionStorage.removeItem(scrollStorageKey), 400);
-            };
-
-            if ('scrollRestoration' in history) {
-                history.scrollRestoration = 'manual';
-            }
 
             new Chart(document.getElementById('channelChart'), {
                 type: 'bar',
@@ -452,16 +435,19 @@
                 }
             });
 
-            document.querySelectorAll('form[data-preserve-scroll="true"]').forEach(form => {
-                form.addEventListener('submit', persistScroll);
+            document.querySelectorAll('form[data-scroll-fragment]').forEach(form => {
+                form.addEventListener('submit', () => {
+                    const fragment = form.dataset.scrollFragment;
+                    if (!fragment) return;
+                    const action = form.getAttribute('action') || window.location.pathname;
+                    const actionWithoutHash = action.split('#')[0];
+                    form.setAttribute('action', `${actionWithoutHash}#${fragment}`);
+                });
             });
-
-            window.addEventListener('beforeunload', persistScroll);
-            window.addEventListener('DOMContentLoaded', restoreScroll);
-            window.addEventListener('load', restoreScroll);
-            window.addEventListener('pageshow', restoreScroll);
         </script>
     </main>
 </div>
 </body>
+</html>
+
 </html>

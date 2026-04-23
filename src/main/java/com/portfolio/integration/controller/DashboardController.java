@@ -155,7 +155,7 @@ public class DashboardController {
 
         interfaceMonitoringService.register(request);
         redirectAttributes.addFlashAttribute("message", "신규 인터페이스가 등록되었습니다.");
-        return "redirect:/";
+        return "redirect:/#registration-section";
     }
 
     @PostMapping("/interfaces/{id}/update")
