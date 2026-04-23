@@ -389,6 +389,23 @@
             const statusValues = /*[[${statusChartValues}]]*/ [];
             const timelineLabels = /*[[${executionTimelineLabels}]]*/ [];
             const failureValues = /*[[${executionFailureValues}]]*/ [];
+            const scrollStorageKey = 'dashboard-scroll:' + window.location.pathname;
+
+            const persistScroll = () => sessionStorage.setItem(scrollStorageKey, String(window.scrollY));
+            const restoreScroll = () => {
+                const savedScrollY = sessionStorage.getItem(scrollStorageKey);
+                if (savedScrollY === null) return;
+                const top = Number(savedScrollY);
+                window.scrollTo(0, top);
+                requestAnimationFrame(() => window.scrollTo(0, top));
+                setTimeout(() => window.scrollTo(0, top), 0);
+                setTimeout(() => window.scrollTo(0, top), 150);
+                setTimeout(() => sessionStorage.removeItem(scrollStorageKey), 400);
+            };
+
+            if ('scrollRestoration' in history) {
+                history.scrollRestoration = 'manual';
+            }
 
             new Chart(document.getElementById('channelChart'), {
                 type: 'bar',
@@ -434,6 +451,15 @@
                     scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
                 }
             });
+
+            document.querySelectorAll('form[data-preserve-scroll="true"]').forEach(form => {
+                form.addEventListener('submit', persistScroll);
+            });
+
+            window.addEventListener('beforeunload', persistScroll);
+            window.addEventListener('DOMContentLoaded', restoreScroll);
+            window.addEventListener('load', restoreScroll);
+            window.addEventListener('pageshow', restoreScroll);
         </script>
     </main>
 </div>
